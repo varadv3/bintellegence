@@ -25,6 +25,7 @@ async def status():
     """)
     data = list()
     for row in cur.fetchall():
+        
         org_detail = {}
         org_detail["org_name"] = row[1]
         org_detail["filled_dry_bins"] = row[2]

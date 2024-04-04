@@ -22,7 +22,7 @@ export default function Header() {
                         </Link>
                         <Link
                             to="#"
-                            className="text-white bg-green-900 hover:bg-green-900 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 focus:outline-none"
+                            className="text-white bg-green-900 rounded-full hover:bg-green-900 focus:ring-4 focus:ring-green-300 font-medium text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 focus:outline-none"
                         >
                             Get started
                         </Link>

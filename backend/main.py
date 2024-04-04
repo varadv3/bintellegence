@@ -1,7 +1,8 @@
 import os
 from unittest.mock import Base
+from exceptiongroup import catch
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from database import get_database_connection
 
 app = FastAPI()
@@ -11,6 +12,12 @@ cur = conn.cursor()
 class Admin(BaseModel):
     username: str
     password: str
+
+class customer_query(BaseModel):
+    name: str
+    email: EmailStr
+    contact_no: str
+    query: str
 
 @app.post("/admin")
 async def admin(admin: Admin):
@@ -47,3 +54,16 @@ async def status():
     if(len(data) == 0):
         return HTTPException(status_code=400, detail="Data not found")
     return data
+
+@app.post("/get_customer_query")
+def get(data: customer_query):
+    try:
+        cur.execute(f"""
+            INSERT INTO public.contacts_about_us(
+            name, email, contact_no, quries)
+            VALUES ('{data.name}', '{data.email}', '{data.contact_no}', '{data.query}');
+        """)
+    except:
+        raise HTTPException(status_code=400, detail="Quries not inserted!")
+    conn.commit()
+    return HTTPException(status_code=200, detail="Queries added succesfully")

@@ -1,12 +1,20 @@
-import os
-from unittest.mock import Base
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from database import get_database_connection
 
 app = FastAPI()
 conn = get_database_connection()
 cur = conn.cursor()
+
+# Allow all origins (not recommended for production, you can restrict it to specific origins)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # This will allow all origins, you can specify your frontend URL instead
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
 
 class Admin(BaseModel):
     username: str
@@ -15,8 +23,8 @@ class Admin(BaseModel):
 @app.post("/admin")
 async def admin(admin: Admin):
     if admin.username == os.getenv("ADMIN_USERNAME") and admin.password == os.getenv("ADMIN_PASSWORD"):
-        return {"message" : "Admin logged in Successfully"}
-    return HTTPException(status_code=400, detail="Wrong Username or Password") 
+        return {"message": "Admin logged in Successfully"}
+    return HTTPException(status_code=400, detail="Wrong Username or Password")
 
 @app.get("/status")
 async def status():
@@ -47,3 +55,26 @@ async def status():
     if(len(data) == 0):
         return HTTPException(status_code=400, detail="Data not found")
     return data
+
+
+
+@app.post("/increment-wet-bins")
+async def increment_wet_bins(org_name: str):
+    try:
+        # Example SQL query to increment filled wet bins count
+        cur.execute("UPDATE organisation SET filled_wet_bins = filled_wet_bins + 1 WHERE org_name = %s", (org_name,))
+        conn.commit()
+        return {"message": f"Wet bins for organization {org_name} incremented successfully"}
+    except Exception as e:
+        # Handle any errors that occur during database operation
+        return HTTPException(status_code=500, detail=f"Error incrementing wet bins: {str(e)}")
+
+
+
+@app.post("/reset-bins")
+async def reset_bins():
+    # Implement logic to reset the counts of all bins in your database
+    # Example: Set the counts of dry and wet bins to 0
+    # Update your database accordingly
+    # Return a success message or appropriate response
+    return {"message": "Bins reset successfully"}

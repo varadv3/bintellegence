@@ -1,27 +1,21 @@
-/*
-  ESP-NOW Demo - Transmit
-  esp-now-demo-xmit.ino
-  Sends data to Responder
-  
-  DroneBot Workshop 2022
-  https://dronebotworkshop.com
-*/
-
 // Include Libraries
 #include <esp_now.h>
 #include <WiFi.h>
+#include<Wire.h>
 
-// Variables for test data
-int int_value;
-float float_value;
-bool bool_value = true;
+#define echoPin 2
+#define trigPin 4
+
+long duration, distance;
+const long thresholdValue = 5;
 
 // MAC Address of responder - edit as required
 uint8_t broadcastAddress[] = {0xA4,0xE5,0x7C,0xF5,0x99,0x2C};
 
 // Define a data structure
 typedef struct struct_message {
-  float depth;
+  long depth;
+  bool isFilled;
 } struct_message;
 
 // Create a structured object
@@ -40,6 +34,9 @@ void setup() {
   
   // Set up Serial Monitor
   Serial.begin(115200);
+
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
  
   // Set ESP32 as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -64,12 +61,29 @@ void setup() {
     return;
   }
 }
+long get_depth(){
+  
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration / 58.2;
+  String disp = String(distance);
 
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+  return distance;
+}
 void loop() {
 
   // Create test data
-  myData.depth = 28;
-  
+  myData.depth = get_depth();
+  myData.isFilled = myData.depth <= thresholdValue;
+
   // Send message via ESP-NOW
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
    

@@ -7,10 +7,7 @@ def get_database_connection():
             dbname=os.environ["POSTGRES_DATABASE"],
             user=os.environ["POSTGRES_USER"],
             password=os.environ["POSTGRES_PASSWORD"],
-<<<<<<< HEAD
             sslmode="require",
-=======
->>>>>>> origin/imposter
             options='endpoint=ep-tight-scene-a41oofva-pooler'
         )
         print("Database Connected!")
